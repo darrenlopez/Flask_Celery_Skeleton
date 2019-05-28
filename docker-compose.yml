@@ -1,0 +1,43 @@
+version: "3"
+services:
+  web:
+    container_name: Local_App
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    restart: always
+    ports:
+     - "5000:5000"
+    depends_on:
+      - rabbit
+  celery:
+    container_name: Celery_Worker
+    build: .
+    command: [celery, worker, --app=exchange.celery, --concurrency=20, --loglevel=INFO]
+    depends_on:
+      - rabbit
+    links:
+      - rabbit
+    working_dir: /app
+  celery-beat:
+    container_name: celery_beat
+    build: .
+    command: [celery, beat, --app=exchange.celery, --loglevel=INFO]
+    working_dir: /app
+    volumes:
+      - .:/code
+    depends_on:
+      - rabbit
+    links:
+      - rabbit
+  rabbit:
+    hostname: "rabbit"
+    container_name: RabbitMQ
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=pass
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+

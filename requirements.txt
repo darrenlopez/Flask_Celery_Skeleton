@@ -1,0 +1,7 @@
+celery
+flask
+pandas
+pymysql
+requests
+sentry-sdk
+sqlalchemy
